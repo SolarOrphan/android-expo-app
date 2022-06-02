@@ -18,7 +18,7 @@ export default function Dashboard({ navigation }) {
   const [collections, collections_chg] = useState([]);
   let mounted = true;
   const load_collections = async () =>
-    await fetch("http://192.168.0.158:3000/collection/", {
+    await fetch("http://192.168.8.142:3000/collection/", {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -42,8 +42,12 @@ export default function Dashboard({ navigation }) {
         {collections ? (
           collections.map((collection) => {
             return (
-      
-      <CollectionItem key={collection._id}  collection={collection} navigation={navigation} load_collections={load_collections}/>
+              <CollectionItem
+                key={collection._id}
+                collection={collection}
+                navigation={navigation}
+                load_collections={load_collections}
+              />
             );
           })
         ) : (
@@ -55,15 +59,15 @@ export default function Dashboard({ navigation }) {
       </ScrollView>
       <TouchableOpacity
         style={styles.addcoll}
-        onPress={()=>changeshowmodal()}
+        onPress={() => changeshowmodal()}
       >
         <Text style={styles.addcolltext}>Add Collection</Text>
       </TouchableOpacity>
-      <AddCollection showmodal={showmodal}
-      changeshowmodal={changeshowmodal}
-      load_collections={load_collections}
-
-       />
+      <AddCollection
+        showmodal={showmodal}
+        changeshowmodal={changeshowmodal}
+        load_collections={load_collections}
+      />
     </View>
   );
 }
@@ -116,10 +120,10 @@ const styles = StyleSheet.create({
     flex: 9,
     // height:200,
     display: "flex",
-    margin:0,
+    margin: 0,
     flexDirection: "column",
     // marginTop: -250,
-    padding:0,
+    padding: 0,
   },
   addcoll: {
     borderWidth: 1,

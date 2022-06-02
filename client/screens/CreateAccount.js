@@ -17,32 +17,30 @@ export default function CreateAccount({ navigation }) {
   const [confirm, confirm_chg] = useState("");
   const create_submit = async (username, password, confirm) => {
     if (username > "" && password > "" && confirm > "" && confirm == password)
-    await fetch("http://192.168.0.158:3000/user", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: username,
-        password: password,
-      }),
-    })
-      .then(async (response) => {
-        let res = await response.json();
-        if (res.message == "Success") {
-          username_chg("")
-          password_chg("")
-          confirm_chg("")
-          navigation.navigate("Login");
-        }
-        else if (res.message == "User already exists") console.log("exist");
+      await fetch("http://192.168.8.142:3000/user", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+        }),
       })
-      .catch((error) => {
-        console.error(error);
-      });
-      else
-      return null
+        .then(async (response) => {
+          let res = await response.json();
+          if (res.message == "Success") {
+            username_chg("");
+            password_chg("");
+            confirm_chg("");
+            navigation.navigate("Login");
+          } else if (res.message == "User already exists") console.log("exist");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    else return null;
   };
   return (
     <View style={styles.container}>
@@ -66,7 +64,7 @@ export default function CreateAccount({ navigation }) {
           defaultValue={password}
           secureTextEntry={true}
           onChangeText={(new_password) => password_chg(new_password)}
-          />
+        />
         <TextInput
           style={styles.text_box}
           secureTextEntry={true}

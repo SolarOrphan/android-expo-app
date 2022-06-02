@@ -4,14 +4,18 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  Modal
+  Modal,
 } from "react-native";
 import { React, useState } from "react";
-export default function AddCollection({ showmodal, changeshowmodal,load_collections}) {
+export default function AddCollection({
+  showmodal,
+  changeshowmodal,
+  load_collections,
+}) {
   const [name, name_chg] = useState("");
   const [desc, desc_chg] = useState("");
   const add_coll_submit = async (name, desc) => {
-    await fetch("http://192.168.0.158:3000/collection/", {
+    await fetch("http://192.168.8.142:3000/collection/", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -25,10 +29,10 @@ export default function AddCollection({ showmodal, changeshowmodal,load_collecti
       .then(async (response) => {
         let res = await response.json();
         if (res.message == "Success") {
-          name_chg("")
-          desc_chg("")
-          load_collections()
-          changeshowmodal(false)
+          name_chg("");
+          desc_chg("");
+          load_collections();
+          changeshowmodal(false);
         } else if (res.message == "Fail") console.log("Fail");
       })
       .catch((error) => {
@@ -36,19 +40,23 @@ export default function AddCollection({ showmodal, changeshowmodal,load_collecti
       });
   };
   return (
-    <Modal  style={styles.modalcontainer} animationType="slide" visible={showmodal}>
+    <Modal
+      style={styles.modalcontainer}
+      animationType="slide"
+      visible={showmodal}
+    >
       <View style={styles.modalform}>
         <Text style={styles.header}>Add Collection</Text>
         <TextInput
           style={styles.text_box}
           placeholder="Collection name"
           defaultValue={name}
-          onChangeText={(new_name)=> name_chg(new_name)}
-          />
+          onChangeText={(new_name) => name_chg(new_name)}
+        />
         <TextInput
           style={styles.text_box}
           defaultValue={desc}
-          onChangeText={(new_desc)=> desc_chg(new_desc)}
+          onChangeText={(new_desc) => desc_chg(new_desc)}
           placeholder="Collection description"
         />
         <View style={styles.btncontainer}>

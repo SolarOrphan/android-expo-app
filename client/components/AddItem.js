@@ -13,12 +13,12 @@ export default function AddItem({
   items_chg,
   collection,
 }) {
-  console.log(collection)
+  console.log(collection);
   const [name, name_chg] = useState("");
   const [desc, desc_chg] = useState("");
   const load_items = async (ids) => {
     console.log(ids);
-    await fetch("http://192.168.0.158:3000/item/get_items", {
+    await fetch("http://192.168.8.142:3000/item/get_items", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -29,12 +29,12 @@ export default function AddItem({
       }),
     }).then(async (res) => {
       let res_fm = res.json();
-      items_chg(res_fm.data.item_ids)
+      items_chg(res_fm.data.item_ids);
     });
   };
   const add_item_submit = async (name, desc, collection) => {
-    console.log(collection)
-    await fetch("http://192.168.0.158:3000/item/", {
+    console.log(collection);
+    await fetch("http://192.168.8.142:3000/item/", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -57,8 +57,8 @@ export default function AddItem({
       .catch((error) => {
         console.error(error);
       });
-      load_items(collection.item_ids);
-      changeshowmodal(false);
+    load_items(collection.item_ids);
+    changeshowmodal(false);
   };
   return (
     <Modal visible={show} style={styles.modalcontainer} animationType="slide">

@@ -14,7 +14,7 @@ export default function Login({ navigation }) {
   const [username, username_chg] = useState("");
   const [password, password_chg] = useState("");
   const login_submit = async (username, password) => {
-    await fetch("http://192.168.0.158:3000/user/login", {
+    await fetch("http://192.168.8.142:3000/user/login", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -28,8 +28,8 @@ export default function Login({ navigation }) {
       .then(async (response) => {
         let res = await response.json();
         if (res.message == "Success") {
-          username_chg("")
-          password_chg("")
+          username_chg("");
+          password_chg("");
           navigation.navigate("Dashboard");
         } else if (res.message == "Fail") console.log("Fail");
       })

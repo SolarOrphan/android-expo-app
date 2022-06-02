@@ -19,7 +19,7 @@ export default function ViewItem({ route }) {
   const [item, item_chg] = useState({});
 
   const delete_item = async (_id) => {
-    await fetch("http://192.168.0.158:3000/item/delete_item", {
+    await fetch("http://192.168.8.142:3000/item/delete_item", {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -31,7 +31,7 @@ export default function ViewItem({ route }) {
     });
   };
   const update = async (item) => {
-    await fetch("http://192.168.0.158:3000/item/update", {
+    await fetch("http://192.168.8.142:3000/item/update", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -48,7 +48,7 @@ export default function ViewItem({ route }) {
 
   useEffect(() => {
     const load_items_info = async (_id) => {
-      await fetch("http://192.168.0.158:3000/item/get_one", {
+      await fetch("http://192.168.8.142:3000/item/get_one", {
         method: "POST",
         headers: {
           Accept: "application/json",

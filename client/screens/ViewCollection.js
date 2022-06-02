@@ -20,7 +20,7 @@ export default function ViewCollection({ route, navigation }) {
   const [items, items_chg] = useState([]);
   const [coll_info, coll_info_chg] = useState({});
   const delcolltext = async (_id) => {
-    await fetch("http://192.168.0.158:3000/collection/delete", {
+    await fetch("http://192.168.8.142:3000/collection/delete", {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -37,10 +37,10 @@ export default function ViewCollection({ route, navigation }) {
       }
     });
   };
-  
+
   useEffect(() => {
     const load_items = async (item_ids) => {
-      await fetch("http://192.168.0.158:3000/item/get_items", {
+      await fetch("http://192.168.8.142:3000/item/get_items", {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -57,7 +57,7 @@ export default function ViewCollection({ route, navigation }) {
       });
     };
     const load_collection_info = async (_id) => {
-      await fetch("http://192.168.0.158:3000/collection/get_one", {
+      await fetch("http://192.168.8.142:3000/collection/get_one", {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -78,46 +78,47 @@ export default function ViewCollection({ route, navigation }) {
     load_collection_info(collection._id);
     return () => (mounted = false);
   }, []);
-  if(mounted && coll_info){
-    let collection = coll_info
-  return (
-    <View style={styles.container}>
-      <Text style={styles.header}>{coll_info.name}</Text>
-      <Text style={styles.label}>Collection Items</Text>
+  if (mounted && coll_info) {
+    let collection = coll_info;
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}>{coll_info.name}</Text>
+        <Text style={styles.label}>Collection Items</Text>
 
-      <ScrollView style={styles.items}>
-        {items ? (
-          items.map((item) => {
-            return <Item key={item._id} item={item} navigation={navigation} />;
-          })
-        ) : (
-          <View></View>
-        )}
+        <ScrollView style={styles.items}>
+          {items ? (
+            items.map((item) => {
+              return (
+                <Item key={item._id} item={item} navigation={navigation} />
+              );
+            })
+          ) : (
+            <View></View>
+          )}
+          <StatusBar style="auto" />
+        </ScrollView>
+        <TouchableOpacity
+          style={styles.delcoll}
+          onPress={() => delcolltext(coll_info._id)}
+        >
+          <Text style={styles.delcolltext}>Delete Collection</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.addcoll}
+          onPress={() => changeshowmodal(true)}
+        >
+          <Text style={styles.addcolltext}>Add Item</Text>
+        </TouchableOpacity>
+        <AddItem
+          show={showmodal}
+          changeshowmodal={changeshowmodal}
+          items_chg={() => items_chg}
+          collection={collection}
+        />
         <StatusBar style="auto" />
-      </ScrollView>
-      <TouchableOpacity
-        style={styles.delcoll}
-        onPress={() => delcolltext(coll_info._id)}
-      >
-        <Text style={styles.delcolltext}>Delete Collection</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.addcoll}
-        onPress={() => changeshowmodal(true)}
-      >
-        <Text style={styles.addcolltext}>Add Item</Text>
-      </TouchableOpacity>
-      <AddItem
-        show={showmodal}
-        changeshowmodal={changeshowmodal}
-        items_chg={() => items_chg}
-        collection={collection}
-      />
-      <StatusBar style="auto" />
-    </View>
-  );
-        }
-  else return <></>
+      </View>
+    );
+  } else return <></>;
 }
 
 const styles = StyleSheet.create({
