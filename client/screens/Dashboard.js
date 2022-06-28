@@ -12,7 +12,8 @@ import { React, useState, useEffect } from "react";
 import CollectionItem from "../components/Collections.js";
 import AddCollection from "../components/AddCollection.js";
 
-export default function Dashboard({ navigation }) {
+export default function Dashboard({ navigation , props}) {
+  console.log(props.route.params)
   const [showmodal, changeshowmodal] = useState(false);
 
   const [collections, collections_chg] = useState([]);

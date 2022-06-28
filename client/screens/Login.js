@@ -30,7 +30,7 @@ export default function Login({ navigation }) {
         if (res.message == "Success") {
           username_chg("")
           password_chg("")
-          navigation.navigate("Dashboard");
+          navigation.navigate("Dashboard", {id : res.data.id});
         } else if (res.message == "Fail") console.log("Fail");
       })
       .catch((error) => {
