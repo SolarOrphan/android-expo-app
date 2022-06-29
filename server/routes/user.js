@@ -7,9 +7,9 @@ const client = new Client({
     secureConnectBundle: "secure-connect-currencykeepers.zip",
   },
   credentials: {
-    username: "BQjqAHeWRiPhqqIUtXviKqlN",
+    username: "caCRCuZJNjOfUWkQirbjTBnx",
     password:
-      "QTwway7i7z75MFZzFOo1lWMJF8p+DQ2G0Cj-J0vCC9bdSmh-FTE-2n9vnb16q.8he-6E0.pKsFUCC9I+pGkLjI,XwJpgBUbpL2-9K1tECdPIBgk56dC8CsFAmDQ3mNLw",
+      "N1w+B4ohe+eHjkGn2Mhcj1gzDq-N5,No6eBfca1U0c.oBogkBvin0NCPLy23PZpY7OqqhE6F72KebZhB_d3qH5rnv5IW1B.LXn3HM7xK1T.UOrJWjPNxS.CxHZEL0.cK",
   },
 });
 

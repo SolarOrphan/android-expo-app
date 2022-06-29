@@ -6,9 +6,9 @@ const client = new Client({
     secureConnectBundle: "secure-connect-currencykeepers.zip",
   },
   credentials: {
-    username: "BQjqAHeWRiPhqqIUtXviKqlN",
+    username: "caCRCuZJNjOfUWkQirbjTBnx",
     password:
-      "QTwway7i7z75MFZzFOo1lWMJF8p+DQ2G0Cj-J0vCC9bdSmh-FTE-2n9vnb16q.8he-6E0.pKsFUCC9I+pGkLjI,XwJpgBUbpL2-9K1tECdPIBgk56dC8CsFAmDQ3mNLw",
+      "N1w+B4ohe+eHjkGn2Mhcj1gzDq-N5,No6eBfca1U0c.oBogkBvin0NCPLy23PZpY7OqqhE6F72KebZhB_d3qH5rnv5IW1B.LXn3HM7xK1T.UOrJWjPNxS.CxHZEL0.cK",
   },
 });
 //Creating collection
@@ -31,7 +31,7 @@ router.post("/", async (req, res) => {
               name +
               "', '" +
               description +
-             "');"
+              "');"
           );
         }
       });
@@ -48,12 +48,10 @@ router.post("/", async (req, res) => {
         `UPDATE currency_keepers.collections SET item_ids = item_ids + [${collection_id}] WHERE id = ${user_obj.rows[0].id};`
       )
       .then((data) => {
-        res
-          .status(200)
-          .json({
-            message: "Success",
-            data: { collection_ids: user_obj.rows[0].item_ids },
-          });
+        res.status(200).json({
+          message: "Success",
+          data: { collection_ids: user_obj.rows[0].item_ids },
+        });
       });
   } catch (err) {
     console.log(err);
@@ -66,13 +64,11 @@ router.post("/", async (req, res) => {
 router.post("/get_items", async (req, res) => {
   try {
     var { ids } = req.body;
-    console.log(ids)
+    console.log(ids);
     await client.connect();
     await client
       .execute(
-        `SELECT * FROM currency_keepers.items WHERE id in (${ids.join(
-          ", "
-        )});`
+        `SELECT * FROM currency_keepers.items WHERE id in (${ids.join(", ")});`
       )
       .then((data) => {
         if (data.rowLength > 0 > 0)
@@ -120,7 +116,7 @@ router.delete("/delete", async (req, res) => {
     await client
       .execute(`DELETE  FROM currency_keepers.items WHERE id = ${id};`)
       .then((data) => {
-        res.status(200).json({ message: "Success"});
+        res.status(200).json({ message: "Success" });
       });
   } catch (err) {
     console.log("Error");

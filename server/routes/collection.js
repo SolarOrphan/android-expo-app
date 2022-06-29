@@ -6,9 +6,9 @@ const client = new Client({
     secureConnectBundle: "secure-connect-currencykeepers.zip",
   },
   credentials: {
-    username: "BQjqAHeWRiPhqqIUtXviKqlN",
+    username: "caCRCuZJNjOfUWkQirbjTBnx",
     password:
-      "QTwway7i7z75MFZzFOo1lWMJF8p+DQ2G0Cj-J0vCC9bdSmh-FTE-2n9vnb16q.8he-6E0.pKsFUCC9I+pGkLjI,XwJpgBUbpL2-9K1tECdPIBgk56dC8CsFAmDQ3mNLw",
+      "N1w+B4ohe+eHjkGn2Mhcj1gzDq-N5,No6eBfca1U0c.oBogkBvin0NCPLy23PZpY7OqqhE6F72KebZhB_d3qH5rnv5IW1B.LXn3HM7xK1T.UOrJWjPNxS.CxHZEL0.cK",
   },
 });
 //Creating collection
@@ -52,12 +52,10 @@ router.post("/", async (req, res) => {
         `UPDATE currency_keepers.users SET collection_ids = collection_ids + [${collection_id}] WHERE id = ${user_obj.rows[0].id};`
       )
       .then((data) => {
-        res
-          .status(200)
-          .json({
-            message: "Success",
-            data: { collection_ids: user_obj.rows[0].collection_ids },
-          });
+        res.status(200).json({
+          message: "Success",
+          data: { collection_ids: user_obj.rows[0].collection_ids },
+        });
       });
   } catch (err) {
     console.log(err);
@@ -124,7 +122,7 @@ router.delete("/delete", async (req, res) => {
     await client
       .execute(`DELETE  FROM currency_keepers.collections WHERE id = ${id};`)
       .then((data) => {
-        res.status(200).json({ message: "Success"});
+        res.status(200).json({ message: "Success" });
       });
   } catch (err) {
     console.log("Error");
