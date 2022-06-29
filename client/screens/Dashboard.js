@@ -11,60 +11,134 @@ import {
 import { React, useState, useEffect } from "react";
 import CollectionItem from "../components/Collections.js";
 import AddCollection from "../components/AddCollection.js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Loading from "../components/Loading";
 
-export default function Dashboard({ navigation , props}) {
-  console.log(props.route.params)
+export default function Dashboard({ navigation }) {
   const [showmodal, changeshowmodal] = useState(false);
+  const [succreq, succreq_chg] = useState(false);
+  const [user_obj, user_obj_chg] = useState(null);
+  const [load, load_chg] = useState(false);
 
+  const change_user_obj = (userobj) => {
+    user_obj_chg(userobj);
+  };
   const [collections, collections_chg] = useState([]);
   let mounted = true;
-  const load_collections = async () =>
-    await fetch("http://192.168.0.158:3000/collection/", {
-      method: "GET",
+  const load_collections = async (ids_retreived) => {
+    await fetch("http://192.168.0.158:3000/collection/get_collections", {
+      method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        ids: ids_retreived,
+      }),
     }).then(async (res) => {
       let res_fm = await res.json();
       if (mounted) {
+        succreq_chg(true);
         collections_chg(res_fm.data);
       }
     });
+  };
+  const get_user = async (id_user) =>
+    await fetch("http://192.168.0.158:3000/user/get_user", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: id_user,
+      }),
+    })
+      .then(async (res) => {
+        let response = await res.json();
+        if (response.message == "Success") {
+          return {
+            ids: response.data.user.collection_ids,
+            user_obj: response.data.user,
+          };
+        } else navigation.navigate("Login");
+      })
+      .catch((e) => console.log(e));
+  const storage_userid = async () => {
+    try {
+      return await AsyncStorage.getItem("@user_id");
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
+  };
   useEffect(() => {
-    load_collections();
-    return () => (mounted = false);
+    storage_userid().then(async (user_id) => {
+      if (user_id != null) {
+        load_chg(true);
+
+        await get_user(user_id)
+          .then(({ ids, user_obj }) => {
+            change_user_obj(user_obj);
+            if (ids != null) {
+              load_collections(ids);
+              load_chg(false);
+
+              console.log(collections);
+            }
+            return () => (mounted = false);
+          })
+          .catch((e) => {
+            console.log(e);
+            navigation.navigate("Login");
+          });
+      } else navigation.navigate("Login");
+    });
   }, []);
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Welcome</Text>
+         {load && succreq ? <Loading /> : null}
+      <Text style={styles.header}>
+        Welcome back {user_obj ? user_obj.username : null}
+      </Text>
       <Text style={styles.label}>My Collections</Text>
       <ScrollView style={styles.collections}>
         {collections ? (
           collections.map((collection) => {
             return (
-      
-      <CollectionItem key={collection._id}  collection={collection} navigation={navigation} load_collections={load_collections}/>
+              <CollectionItem
+                key={collection.id}
+                collection={collection}
+                navigation={navigation}
+                load_collections={load_collections}
+              />
             );
           })
         ) : (
           <View>
-            <Text>Press on the button below to add a collection</Text>
+            {succreq == false ? (
+              <Text>
+                Your collections failed to load. Please refresh or try again in
+                a few minutes.
+              </Text>
+            ) : (
+              <Text>Press on the button below to add a collection</Text>
+            )}
           </View>
         )}
         <StatusBar style="auto" />
       </ScrollView>
       <TouchableOpacity
         style={styles.addcoll}
-        onPress={()=>changeshowmodal()}
+        onPress={() => changeshowmodal()}
       >
         <Text style={styles.addcolltext}>Add Collection</Text>
       </TouchableOpacity>
-      <AddCollection showmodal={showmodal}
-      changeshowmodal={changeshowmodal}
-      load_collections={load_collections}
-
-       />
+      <AddCollection
+        showmodal={showmodal}
+        changeshowmodal={changeshowmodal}
+        load_collections={load_collections}
+      />
     </View>
   );
 }
@@ -117,10 +191,10 @@ const styles = StyleSheet.create({
     flex: 9,
     // height:200,
     display: "flex",
-    margin:0,
+    margin: 0,
     flexDirection: "column",
     // marginTop: -250,
-    padding:0,
+    padding: 0,
   },
   addcoll: {
     borderWidth: 1,

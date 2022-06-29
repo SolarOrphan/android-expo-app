@@ -13,12 +13,11 @@ import Items from "../components/Items.js";
 import AddItem from "../components/AddItem.js";
 const default_image = require("../assets/img/defaultimage.png");
 export default function ViewItem({ route }) {
-  let _id = route.params._id;
+  let id = route.params.id;
   let mounted = true;
-
   const [item, item_chg] = useState({});
-
-  const delete_item = async (_id) => {
+  
+  const delete_item = async (id) => {
     await fetch("http://192.168.0.158:3000/item/delete_item", {
       method: "DELETE",
       headers: {
@@ -26,7 +25,7 @@ export default function ViewItem({ route }) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        _id: _id,
+        id: id,
       }),
     });
   };
@@ -46,26 +45,29 @@ export default function ViewItem({ route }) {
     });
   };
 
+  const load_items_info = async (id) => {
+    await fetch("http://192.168.0.158:3000/item/get_one", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: id,
+      }),
+    }).then(async (res) => {
+      let res_fm = await res.json();
+      if (mounted) {
+        item_chg(res_fm.data);
+      }
+    }).catch(e=>{
+      console.log(e)
+    })
+  };
   useEffect(() => {
-    const load_items_info = async (_id) => {
-      await fetch("http://192.168.0.158:3000/item/get_one", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          _id: _id,
-        }),
-      }).then(async (res) => {
-        let res_fm = await res.json();
-        if (mounted) {
-          item_chg(res_fm.data);
-        }
-      });
-    };
-
-    load_items_info(_id);
+    
+    console.log("HERE")
+    load_items_info(id);
     return () => (mounted = false);
   }, []);
   return (
@@ -88,7 +90,7 @@ export default function ViewItem({ route }) {
       <View style={styles.buttons}>
         <TouchableOpacity
           style={styles.btn_cancel}
-          onPress={() => delete_item(item._id)}
+          onPress={() => delete_item(item.id)}
         >
           <Text style={styles.btn_text}>Delete</Text>
         </TouchableOpacity>

@@ -1,91 +1,131 @@
 const express = require("express");
 const router = express.Router();
-const Item = require("../models/item");
-const Collection = require("../models/collection");
-
-//Creating item
+const { Client } = require("cassandra-driver");
+const client = new Client({
+  cloud: {
+    secureConnectBundle: "secure-connect-currencykeepers.zip",
+  },
+  credentials: {
+    username: "BQjqAHeWRiPhqqIUtXviKqlN",
+    password:
+      "QTwway7i7z75MFZzFOo1lWMJF8p+DQ2G0Cj-J0vCC9bdSmh-FTE-2n9vnb16q.8he-6E0.pKsFUCC9I+pGkLjI,XwJpgBUbpL2-9K1tECdPIBgk56dC8CsFAmDQ3mNLw",
+  },
+});
+//Creating collection
 router.post("/", async (req, res) => {
   try {
-    var { name, description, collection_id } = req.body;
-    console.log( name, description, collection_id )
-    Item.countDocuments({ name: name }).exec(async (err, count) => {
-      if (count > 0) {
-        res.status(200).json({ message: "item already exists" });
-      } else {
-        const create_item = new Item({
-          name: name,
-          description: description,
-          image: "",
-          creator: "",
-          rating: "",
-        });
-        create_item.save();
-        const collection = await Collection.findOne({
-          _id: collection_id,
-        }).exec();
-          if (Array.isArray(collection.item_ids)) {
-            collection.item_ids.push(create_item._id);
-            collection.save();
-            res.status(200).json({ message: "Success", data: collection.item_ids });
-          }
-      }
-    });
+    var { name, description, id } = req.body;
+    console.log(name, description, id);
+    await client.connect();
+    // Execute a query
+    await client
+      .execute(
+        `SELECT name FROM currency_keepers.items WHERE name = '${name}' ALLOW FILTERING;`
+      )
+      .then(async (data) => {
+        if (data.rowLength > 0) {
+          res.status(202).json({ message: "Exists" });
+        } else {
+          await client.execute(
+            "INSERT INTO currency_keepers.items(id, name, description) VALUES(uuid(), '" +
+              name +
+              "', '" +
+              description +
+             "');"
+          );
+        }
+      });
+    const collection_obj = await client.execute(
+      `SELECT * FROM currency_keepers.items WHERE name = '${name}' ALLOW FILTERING;`
+    );
+    const user_obj = await client.execute(
+      `SELECT * FROM currency_keepers.collections WHERE id = ${id} ALLOW FILTERING;`
+    );
+    var collection_id = collection_obj.rows[0].id;
+    collection_id = collection_id;
+    await client
+      .execute(
+        `UPDATE currency_keepers.collections SET item_ids = item_ids + [${collection_id}] WHERE id = ${user_obj.rows[0].id};`
+      )
+      .then((data) => {
+        res
+          .status(200)
+          .json({
+            message: "Success",
+            data: { collection_ids: user_obj.rows[0].item_ids },
+          });
+      });
   } catch (err) {
-    // console.log(err);
+    console.log(err);
     res.status(500).json({ message: err.message });
   }
+  // await client.shutdown();
 });
 
+//Getting collection object
 router.post("/get_items", async (req, res) => {
   try {
-    var { item_ids } = req.body;
-    const data = await Item.find({ _id: { $in: item_ids } }).exec();
-    res.status(200).json({ message: "Success", data: data });
+    var { ids } = req.body;
+    console.log(ids)
+    await client.connect();
+    await client
+      .execute(
+        `SELECT * FROM currency_keepers.items WHERE id in (${ids.join(
+          ", "
+        )});`
+      )
+      .then((data) => {
+        if (data.rowLength > 0 > 0)
+          res.status(200).json({
+            message: "Success",
+            data: data.rows,
+          });
+        else res.status(202).json({ message: "Fail", data: [] });
+      });
   } catch (err) {
+    console.log("Error");
+    console.log(err);
     res.status(500).json({ message: err.message });
   }
 });
 
-//Getting item object
 router.post("/get_one", async (req, res) => {
   try {
-    var { _id } = req.body;
-    const item = await Item.findOne({ _id: _id }).exec();
-    if (item) res.status(200).json({ message: "Success", data: item });
-    else res.status(200).json({ message: "Fail" });
+    var { id } = req.body;
+    await client.connect();
+    await client
+      .execute(`SELECT * FROM currency_keepers.items WHERE id = ${id};`)
+      .then((data) => {
+        if (data.rowLength > 0)
+          res.status(200).json({
+            message: "Success",
+            data: data.rows[0],
+          });
+        else res.status(202).json({ message: "Fail", data: [] });
+      });
   } catch (err) {
+    console.log("Error");
+    console.log(err);
     res.status(500).json({ message: err.message });
   }
 });
 
-//Updating item object
-router.post("/update_item", async (req, res) => {
+//Updating collection object
+router.patch("/", (req, res) => {});
+
+router.delete("/delete", async (req, res) => {
   try {
-    var { _id, name, description, create_item, im } = req.body;
-    const item = await Item.findOne({ _id: _id }).exec();
-    item.name = name;
-    item.description = description;
-    item.creator = creater;
-    item.image = image;
-    item.rating = rating;
-    item.save();
-    if (item) res.status(200).json({ message: "Success", data: item });
-    else res.status(200).json({ message: "Fail" });
+    var { id } = req.body;
+    await client.connect();
+    await client
+      .execute(`DELETE  FROM currency_keepers.items WHERE id = ${id};`)
+      .then((data) => {
+        res.status(200).json({ message: "Success"});
+      });
   } catch (err) {
+    console.log("Error");
+    console.log(err);
     res.status(500).json({ message: err.message });
   }
 });
-
-//Deleting object
-router.delete("/delete_item", async (req, res) => {
-  try {
-    var { _id } = req.body;
-    const item = await Item.findOne({ _id: _id }).exec();
-    item.remove();
-    res.status(200).json({ message: "Success" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
 module.exports = router;

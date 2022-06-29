@@ -7,11 +7,13 @@ import {
   Modal,
 } from "react-native";
 import { React, useState } from "react";
+
 export default function AddItem({
   show,
   changeshowmodal,
   items_chg,
   collection,
+  navigation
 }) {
   console.log(collection)
   const [name, name_chg] = useState("");
@@ -25,7 +27,7 @@ export default function AddItem({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        item_ids: ids,
+        ids: ids,
       }),
     }).then(async (res) => {
       let res_fm = res.json();
@@ -43,7 +45,7 @@ export default function AddItem({
       body: JSON.stringify({
         name: name,
         description: desc,
-        collection_id: collection._id,
+        id: collection.id,
       }),
     })
       .then(async (response) => {
@@ -57,8 +59,10 @@ export default function AddItem({
       .catch((error) => {
         console.error(error);
       });
-      load_items(collection.item_ids);
+      
       changeshowmodal(false);
+      navigation.navigate("ViewCollection")
+      
   };
   return (
     <Modal visible={show} style={styles.modalcontainer} animationType="slide">

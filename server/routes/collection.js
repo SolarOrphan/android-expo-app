@@ -14,60 +14,102 @@ const client = new Client({
 //Creating collection
 router.post("/", async (req, res) => {
   try {
-    var { name, description } = req.body;
+    var { name, description, id } = req.body;
+    console.log(name, description, id);
     await client.connect();
     // Execute a query
     await client
       .execute(
         `SELECT name FROM currency_keepers.collections WHERE name = '${name}' ALLOW FILTERING;`
       )
-      .then((data) => {
-        if (data.rowLength > 0) res.status(202).json({ message: "Exists" });
+      .then(async (data) => {
+        if (data.rowLength > 0) {
+          res.status(202).json({ message: "Exists" });
+        } else {
+          await client.execute(
+            "INSERT INTO currency_keepers.collections(id, name, description, item_ids, goal) VALUES(uuid(), '" +
+              name +
+              "', '" +
+              description +
+              "', " +
+              null +
+              ", " +
+              0 +
+              ");"
+          );
+        }
       });
+    const collection_obj = await client.execute(
+      `SELECT * FROM currency_keepers.collections WHERE name = '${name}' ALLOW FILTERING;`
+    );
+    const user_obj = await client.execute(
+      `SELECT * FROM currency_keepers.users WHERE id = ${id} ALLOW FILTERING;`
+    );
+    var collection_id = collection_obj.rows[0].id;
+    collection_id = collection_id;
     await client
       .execute(
-        "INSERT INTO currency_keepers.collections(id, name, description, item_ids, ) VALUES(uuid(), '" +
-          name +
-          "', '" +
-          description +
-          "', " +
-          [] +
-          0 +
-          ");"
+        `UPDATE currency_keepers.users SET collection_ids = collection_ids + [${collection_id}] WHERE id = ${user_obj.rows[0].id};`
       )
       .then((data) => {
-        res.status(200).json({ message: "Success" });
+        res
+          .status(200)
+          .json({
+            message: "Success",
+            data: { collection_ids: user_obj.rows[0].collection_ids },
+          });
       });
-
-    } catch (err) {
-      console.log(err);
-      res.status(500).json({ message: err.message });
-    }
-    await client.shutdown();
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: err.message });
+  }
+  // await client.shutdown();
 });
 
 //Getting collection object
-router.get("/", async (req, res) => {
+router.post("/get_collections", async (req, res) => {
   try {
-    await Collection.find().exec(async (err, data) => {
-      if (data.length > 0)
-        res.status(200).json({ message: "Success", data: data });
-      else res.status(200).json({ message: "No Collections", data: [] });
-    });
+    var { ids } = req.body;
+    await client.connect();
+    await client
+      .execute(
+        `SELECT * FROM currency_keepers.collections WHERE id in (${ids.join(
+          ", "
+        )});`
+      )
+      .then((data) => {
+        console.log(data);
+        if (data.rowLength > 0 > 0)
+          res.status(200).json({
+            message: "Success",
+            data: data.rows,
+          });
+        else res.status(202).json({ message: "Fail", data: [] });
+      });
   } catch (err) {
+    console.log("Error");
+    console.log(err);
     res.status(500).json({ message: err.message });
   }
 });
 
 router.post("/get_one", async (req, res) => {
   try {
-    console.log(req.body);
-    var { _id } = req.body;
-    const collection = await Collection.findOne({ _id: _id }).exec();
-    if (collection)
-      res.status(200).json({ message: "Success", data: collection });
-    else res.status(200).json({ message: "Fail" });
+    var { id } = req.body;
+    await client.connect();
+    await client
+      .execute(`SELECT * FROM currency_keepers.collections WHERE id = ${id};`)
+      .then((data) => {
+        if (data.rowLength > 0)
+          res.status(200).json({
+            message: "Success",
+            data: data.rows[0],
+          });
+        else res.status(202).json({ message: "Fail", data: [] });
+      });
   } catch (err) {
+    console.log("Error");
+    console.log(err);
     res.status(500).json({ message: err.message });
   }
 });
@@ -77,12 +119,16 @@ router.patch("/", (req, res) => {});
 
 router.delete("/delete", async (req, res) => {
   try {
-    console.log(req);
-    var { _id } = req.body;
-    const collection = await Collection.findOne({ _id: _id }).exec();
-    collection.remove();
-    res.status(200).json({ message: "Success" });
+    var { id } = req.body;
+    await client.connect();
+    await client
+      .execute(`DELETE  FROM currency_keepers.collections WHERE id = ${id};`)
+      .then((data) => {
+        res.status(200).json({ message: "Success"});
+      });
   } catch (err) {
+    console.log("Error");
+    console.log(err);
     res.status(500).json({ message: err.message });
   }
 });

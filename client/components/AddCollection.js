@@ -7,10 +7,21 @@ import {
   Modal
 } from "react-native";
 import { React, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 export default function AddCollection({ showmodal, changeshowmodal,load_collections}) {
   const [name, name_chg] = useState("");
   const [desc, desc_chg] = useState("");
+  const storage_userid = async () => {
+    try {
+      return await AsyncStorage.getItem("@user_id");
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
+  };
   const add_coll_submit = async (name, desc) => {
+  storage_userid().then(async (user_id)=>{
     await fetch("http://192.168.0.158:3000/collection/", {
       method: "POST",
       headers: {
@@ -20,6 +31,7 @@ export default function AddCollection({ showmodal, changeshowmodal,load_collecti
       body: JSON.stringify({
         name: name,
         description: desc,
+        id:user_id
       }),
     })
       .then(async (response) => {
@@ -27,13 +39,14 @@ export default function AddCollection({ showmodal, changeshowmodal,load_collecti
         if (res.message == "Success") {
           name_chg("")
           desc_chg("")
-          load_collections()
+          load_collections(res.data.collection_ids)
           changeshowmodal(false)
         } else if (res.message == "Fail") console.log("Fail");
       })
       .catch((error) => {
         console.error(error);
       });
+  })
   };
   return (
     <Modal  style={styles.modalcontainer} animationType="slide" visible={showmodal}>

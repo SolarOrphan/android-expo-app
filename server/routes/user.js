@@ -12,6 +12,7 @@ const client = new Client({
       "QTwway7i7z75MFZzFOo1lWMJF8p+DQ2G0Cj-J0vCC9bdSmh-FTE-2n9vnb16q.8he-6E0.pKsFUCC9I+pGkLjI,XwJpgBUbpL2-9K1tECdPIBgk56dC8CsFAmDQ3mNLw",
   },
 });
+
 //Creating user
 router.post("/", async (req, res) => {
   try {
@@ -43,20 +44,44 @@ router.post("/", async (req, res) => {
     console.log(err);
     res.status(500).json({ message: err.message });
   }
-  await client.shutdown();
+  // await client.shutdown();
 });
 
-//Getting user object
+//Login
 router.post("/login", async (req, res) => {
   try {
-    var { username, password, id } = req.body;
+    var { username, password } = req.body;
     await client.connect();
     await client
       .execute(
         `SELECT * FROM currency_keepers.users WHERE username = '${username}' AND password = '${password}' ALLOW FILTERING;`
       )
       .then((data) => {
-        if (data.rowLength > 0) res.status(200).json({ message: "Success", data : { id : data.rows[0].id.toString()} });
+        if (data.rowLength > 0)
+          res
+            .status(200)
+            .json({ message: "Success", data: { id: data.rows[0].id } });
+        else res.status(202).json({ message: "Fail" });
+      });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+  // await client.shutdown();
+});
+
+router.post("/get_user", async (req, res) => {
+  try {
+    var { id } = req.body;
+    await client.connect();
+    await client
+      .execute(
+        `SELECT * FROM currency_keepers.users WHERE id = ${id} ALLOW FILTERING;`
+      )
+      .then((data) => {
+        if (data.rowLength > 0)
+          res
+            .status(200)
+            .json({ message: "Success", data: { user: data.rows[0] } });
         else res.status(200).json({ message: "Fail" });
       });
   } catch (err) {
@@ -64,7 +89,7 @@ router.post("/login", async (req, res) => {
 
     res.status(500).json({ message: err.message });
   }
-  await client.shutdown();
+  // await client.shutdown();
 });
 
 //Updating user object

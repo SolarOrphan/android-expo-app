@@ -13,13 +13,13 @@ import Item from "../components/Items.js";
 import AddItem from "../components/AddItem.js";
 
 export default function ViewCollection({ route, navigation }) {
-  const load_collections = route.params.load_collections;
+  // const load_collections = route.params.load_collections;
   const collection = route.params.collection;
   const [showmodal, changeshowmodal] = useState(false);
   let mounted = true;
   const [items, items_chg] = useState([]);
   const [coll_info, coll_info_chg] = useState({});
-  const delcolltext = async (_id) => {
+  const delcolltext = async (id) => {
     await fetch("http://192.168.0.158:3000/collection/delete", {
       method: "DELETE",
       headers: {
@@ -27,13 +27,15 @@ export default function ViewCollection({ route, navigation }) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        _id: _id,
+        id: id,
       }),
     }).then(async (res) => {
       let res_mess = await res.json();
       if (res_mess.message == "Success") {
-        navigation.navigate("Dashboard");
-        load_collections();
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Dashboard'}],
+        });
       }
     });
   };
@@ -47,7 +49,7 @@ export default function ViewCollection({ route, navigation }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          item_ids: item_ids,
+          ids: item_ids,
         }),
       }).then(async (res) => {
         let res_fm_items = await res.json();
@@ -56,7 +58,7 @@ export default function ViewCollection({ route, navigation }) {
         }
       });
     };
-    const load_collection_info = async (_id) => {
+    const load_collection_info = async (id) => {
       await fetch("http://192.168.0.158:3000/collection/get_one", {
         method: "POST",
         headers: {
@@ -64,7 +66,7 @@ export default function ViewCollection({ route, navigation }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          _id: _id,
+          id: id,
         }),
       }).then(async (res) => {
         let res_fm = await res.json();
@@ -75,7 +77,7 @@ export default function ViewCollection({ route, navigation }) {
       });
     };
 
-    load_collection_info(collection._id);
+    load_collection_info(collection.id);
     return () => (mounted = false);
   }, []);
   if(mounted && coll_info){
@@ -88,7 +90,7 @@ export default function ViewCollection({ route, navigation }) {
       <ScrollView style={styles.items}>
         {items ? (
           items.map((item) => {
-            return <Item key={item._id} item={item} navigation={navigation} />;
+            return <Item key={item.id} item={item} navigation={navigation} />;
           })
         ) : (
           <View></View>
@@ -97,7 +99,7 @@ export default function ViewCollection({ route, navigation }) {
       </ScrollView>
       <TouchableOpacity
         style={styles.delcoll}
-        onPress={() => delcolltext(coll_info._id)}
+        onPress={() => delcolltext(coll_info.id)}
       >
         <Text style={styles.delcolltext}>Delete Collection</Text>
       </TouchableOpacity>

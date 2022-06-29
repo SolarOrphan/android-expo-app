@@ -7,13 +7,18 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import { React, useState } from "react";
+import { React, useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Loading from "../components/Loading";
 
 const logo = require("../assets/img/logo.png");
 export default function Login({ navigation }) {
   const [username, username_chg] = useState("");
   const [password, password_chg] = useState("");
+  const [load, load_chg] = useState(false);
+
   const login_submit = async (username, password) => {
+    load_chg(true)
     await fetch("http://192.168.0.158:3000/user/login", {
       method: "POST",
       headers: {
@@ -28,17 +33,42 @@ export default function Login({ navigation }) {
       .then(async (response) => {
         let res = await response.json();
         if (res.message == "Success") {
-          username_chg("")
-          password_chg("")
-          navigation.navigate("Dashboard", {id : res.data.id});
+          try {
+            await AsyncStorage.setItem("@user_id", res.data.id);
+            username_chg("");
+            password_chg("");
+            navigation.navigate("Dashboard");
+            load_chg(false)
+          } catch (e) {
+            // saving error
+          }
         } else if (res.message == "Fail") console.log("Fail");
       })
       .catch((error) => {
         console.error(error);
       });
   };
+
+  const storage_userid = async () => {
+    try {
+      return await AsyncStorage.getItem("@user_id");
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
+  };
+  useEffect(() => {
+    storage_userid().then((user_id) => {
+      if (user_id != null)
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Dashboard" }],
+        });
+    });
+  }, []);
   return (
     <View style={styles.container}>
+      {load ? <Loading /> : null}
       <View style={styles.top_section}>
         <Image source={logo} style={styles.logo} />
       </View>

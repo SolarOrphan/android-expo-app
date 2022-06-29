@@ -15,18 +15,15 @@ const client = new Client({
   });
   await client.connect();
   try {
-    username ="Caydon"
-    password ="Caydon"
     await client.execute(
-      `SELECT * FROM currency_keepers.users WHERE username = '${username}' AND password = '${password}' ALLOW FILTERING;`
+      `CREATE TABLE items(id uuid PRIMARY KEY, name text, description text) `
     ).then(data=>{
-      if (data.rowLength > 0 ) console.log(data.rows[0].id.toString());
-      else console.log(data);
+      console.log(data)
     })
   } catch (err) {
     console.log(err.message );
 }
-await client.shutdown();
+// await client.shutdown();
 }
 
 Run()
