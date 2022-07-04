@@ -19,10 +19,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-mongoose.connect('mongodb://127.0.0.1:27017/CurrencyKeepers', { useNewUrlParser: true})
-const db = mongoose.connection
-db.on('error', (error)=> console.error(error))
-db.once('open', ()=> console.error("Connected to Database"))
+// mongoose.connect('mongodb://127.0.0.1:27017/CurrencyKeepers', { useNewUrlParser: true})
+// const db = mongoose.connection
+// db.on('error', (error)=> console.error(error))
+// db.once('open', ()=> console.error("Connected to Database"))
 
 app.use(express.json())
 

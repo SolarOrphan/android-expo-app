@@ -11,16 +11,18 @@ import {
 import { React, useState, useEffect } from "react";
 import Item from "../components/Items.js";
 import AddItem from "../components/AddItem.js";
+import Loading from "../components/Loading";
 
 export default function ViewCollection({ route, navigation }) {
-  // const load_collections = route.params.load_collections;
   const collection = route.params.collection;
   const [showmodal, changeshowmodal] = useState(false);
   let mounted = true;
   const [items, items_chg] = useState([]);
   const [coll_info, coll_info_chg] = useState({});
+  const [load, load_chg] = useState(false);
+
   const delcolltext = async (id) => {
-    await fetch("http://192.168.0.158:3000/collection/delete", {
+    await fetch("http://192.168.8.142:3000/collection/delete", {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -34,15 +36,16 @@ export default function ViewCollection({ route, navigation }) {
       if (res_mess.message == "Success") {
         navigation.reset({
           index: 0,
-          routes: [{name: 'Dashboard'}],
+          routes: [{ name: "Dashboard" }],
         });
       }
     });
   };
-  
-  useEffect(() => {
-    const load_items = async (item_ids) => {
-      await fetch("http://192.168.0.158:3000/item/get_items", {
+
+  const load_items = async (item_ids) => {
+    if (item_ids != null) {
+      load_chg(true);
+      await fetch("http://192.168.8.142:3000/item/get_items", {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -55,71 +58,82 @@ export default function ViewCollection({ route, navigation }) {
         let res_fm_items = await res.json();
         if (mounted) {
           items_chg(res_fm_items.data);
+          load_chg(false);
         }
       });
-    };
-    const load_collection_info = async (id) => {
-      await fetch("http://192.168.0.158:3000/collection/get_one", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: id,
-        }),
-      }).then(async (res) => {
-        let res_fm = await res.json();
-        if (mounted) {
-          coll_info_chg(res_fm.data);
-          load_items(res_fm.data.item_ids);
-        }
-      });
-    };
-
+    } else load_chg(false);
+  };
+  const load_collection_info = async (id) => {
+    load_chg(true);
+    await fetch("http://192.168.8.142:3000/collection/get_one", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: id,
+      }),
+    }).then(async (res) => {
+      let res_fm = await res.json();
+      if (mounted) {
+        coll_info_chg(res_fm.data);
+        load_items(res_fm.data.item_ids);
+      }
+    });
+  };
+  const refresh_coll = () => {
+    load_collection_info(collection.id);
+  };
+  useEffect(() => {
     load_collection_info(collection.id);
     return () => (mounted = false);
   }, []);
-  if(mounted && coll_info){
-    let collection = coll_info
-  return (
-    <View style={styles.container}>
-      <Text style={styles.header}>{coll_info.name}</Text>
-      <Text style={styles.label}>Collection Items</Text>
+  if (mounted && coll_info) {
+    let collection = coll_info;
+    return (
+      <View style={styles.container}>
+        {load == true ? <Loading /> : null}
 
-      <ScrollView style={styles.items}>
-        {items ? (
-          items.map((item) => {
-            return <Item key={item.id} item={item} navigation={navigation} />;
-          })
-        ) : (
-          <View></View>
-        )}
+        <Text style={styles.header}>{coll_info.name}</Text>
+        <Text style={styles.label}>Collection Items</Text>
+
+        <ScrollView style={styles.items}>
+          {items ? (
+            items.map((item) => {
+              return <Item key={item.id} item={item} navigation={navigation} />;
+            })
+          ) : (
+            <View>Press on the button below to add new items</View>
+          )}
+          <StatusBar style="auto" />
+        </ScrollView>
+        <TouchableOpacity
+          style={styles.delcoll}
+          onPress={() => delcolltext(coll_info.id)}
+        >
+          <Text style={styles.delcolltext}>Delete Collection</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.addcoll}
+          onPress={() => changeshowmodal(true)}
+        >
+          <Text style={styles.addcolltext}>Add Item</Text>
+        </TouchableOpacity>
+        <AddItem
+          show={showmodal}
+          changeshowmodal={changeshowmodal}
+          items_chg={() => items_chg}
+          collection={collection}
+          navigation={navigation}
+        />
+        <TouchableOpacity style={styles.addcoll} onPress={() => refresh_coll()}>
+          <Text style={styles.addcolltext}>Refresh</Text>
+        </TouchableOpacity>
         <StatusBar style="auto" />
-      </ScrollView>
-      <TouchableOpacity
-        style={styles.delcoll}
-        onPress={() => delcolltext(coll_info.id)}
-      >
-        <Text style={styles.delcolltext}>Delete Collection</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.addcoll}
-        onPress={() => changeshowmodal(true)}
-      >
-        <Text style={styles.addcolltext}>Add Item</Text>
-      </TouchableOpacity>
-      <AddItem
-        show={showmodal}
-        changeshowmodal={changeshowmodal}
-        items_chg={() => items_chg}
-        collection={collection}
-      />
-      <StatusBar style="auto" />
-    </View>
-  );
-        }
-  else return <></>
+      </View>
+    );
+  } else return <></>;
 }
 
 const styles = StyleSheet.create({

@@ -8,9 +8,9 @@ async function Run() {
       secureConnectBundle: "secure-connect-currencykeepers.zip",
     },
     credentials: {
-      username: "caCRCuZJNjOfUWkQirbjTBnx",
+      username: "MXXZdvDuqQPdQwTAJNrPxoTZ",
       password:
-        "N1w+B4ohe+eHjkGn2Mhcj1gzDq-N5,No6eBfca1U0c.oBogkBvin0NCPLy23PZpY7OqqhE6F72KebZhB_d3qH5rnv5IW1B.LXn3HM7xK1T.UOrJWjPNxS.CxHZEL0.cK",
+        "fnjNsrGATj-tiAJlUgvK.4g_5J1SX6ZCiWfwgDfj2tbhZdF7WKh+MSDjzv0t6q74TE_fAD.G0v1f1Au6zj.E3b_77JZr+A_PnCOp959tOKLdy+EWr+8CFLiyt4e3gRcH",
     },
   });
   await client.connect();

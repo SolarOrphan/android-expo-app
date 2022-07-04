@@ -11,14 +11,19 @@ import {
 import { React, useState, useEffect } from "react";
 import Items from "../components/Items.js";
 import AddItem from "../components/AddItem.js";
+import Loading from "../components/Loading";
+
 const default_image = require("../assets/img/defaultimage.png");
-export default function ViewItem({ route }) {
+export default function ViewItem({ route, navigation }) {
   let id = route.params.id;
   let mounted = true;
   const [item, item_chg] = useState({});
-  
+  const [load, load_chg] = useState(false);
+  const showCamera = () => {
+    navigation.navigate("Camera");
+  };
   const delete_item = async (id) => {
-    await fetch("http://192.168.0.158:3000/item/delete_item", {
+    await fetch("http://192.168.8.142:3000/item/delete_item", {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -30,13 +35,13 @@ export default function ViewItem({ route }) {
     });
   };
   const update = async (item) => {
-    await fetch("http://192.168.0.158:3000/item/update", {
+    await fetch("http://192.168.8.142:3000/item/update", {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ item }),
+      body: JSON.stringify({ item: item }),
     }).then(async (res) => {
       let res_fm = await res.json();
       if (mounted) {
@@ -46,7 +51,9 @@ export default function ViewItem({ route }) {
   };
 
   const load_items_info = async (id) => {
-    await fetch("http://192.168.0.158:3000/item/get_one", {
+    load_chg(true);
+
+    await fetch("http://192.168.8.142:3000/item/get_one", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -55,53 +62,72 @@ export default function ViewItem({ route }) {
       body: JSON.stringify({
         id: id,
       }),
-    }).then(async (res) => {
-      let res_fm = await res.json();
-      if (mounted) {
-        item_chg(res_fm.data);
-      }
-    }).catch(e=>{
-      console.log(e)
     })
+      .then(async (res) => {
+        let res_fm = await res.json();
+        if (mounted) {
+          item_chg(res_fm.data);
+          load_chg(false);
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
   useEffect(() => {
-    
-    console.log("HERE")
+    console.log("HERE");
     load_items_info(id);
     return () => (mounted = false);
   }, []);
-  return (
-    <View style={styles.container}>
-      <TextInput style={styles.header}>Details </TextInput>
-      <TextInput style={styles.label}>Item : {item.name}</TextInput>
-      <View style={styles.image}>
-        {item.image ? (
-          <Image style={styles.img} src={item.image} />
-        ) : (
-          <Image style={styles.img} source={default_image} />
-        )}
+  if (mounted && item) {
+    let item_info = item;
+    return (
+      <View style={styles.container}>
+        {load == true ? <Loading /> : null}
+        <Text style={styles.header}>Details </Text>
+        <TextInput
+          style={styles.label}
+          placeholder={`Item : ${item_info.name ? item_info.name : ""}`}
+        />
+        <View style={styles.image}>
+          {item_info.image ? (
+            <Image style={styles.img} src={item_info.image} />
+          ) : (
+            <Image style={styles.img} source={default_image} />
+          )}
+          <TouchableOpacity onPress={() => showCamera()}>
+            <Text>Upload Image</Text>
+          </TouchableOpacity>
+        </View>
+        <TextInput
+          style={styles.creator}
+          placeholder={`Creator : ${
+            item_info.creator ? item_info.creator : ""
+          }`}
+        />
+        <TextInput
+          style={styles.description}
+          placeholder={`Description : ${
+            item_info.description ? item_info.description : ""
+          }`}
+        />
+        <View style={styles.buttons}>
+          <TouchableOpacity
+            style={styles.btn_cancel}
+            onPress={() => delete_item(item_info.id)}
+          >
+            <Text style={styles.btn_text}>Delete</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.btn_update}
+            onPress={() => update(item_info)}
+          >
+            <Text style={styles.btn_text}>Update</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <TextInput style={styles.creator} placeholder="Creator">
-        {item.creator}
-      </TextInput>
-      <TextInput style={styles.description} placeholder="Description">
-        {item.description}
-      </TextInput>
-      <View style={styles.buttons}>
-        <TouchableOpacity
-          style={styles.btn_cancel}
-          onPress={() => delete_item(item.id)}
-        >
-          <Text style={styles.btn_text}>Delete</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.btn_update}>
-          <Text style={styles.btn_text} onPress={() => update(item)}>
-            Update
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    );
+  } else return <></>;
 }
 
 const styles = StyleSheet.create({
@@ -119,7 +145,7 @@ const styles = StyleSheet.create({
   },
   label: {
     // marginTop:5,
-    fontSize: 18,
+    fontSize: 20,
     // flex: 0.5,
     fontWeight: "300",
   },
@@ -154,7 +180,9 @@ const styles = StyleSheet.create({
     padding: 10,
     marginTop: 10,
     fontSize: 16,
-    textAlignVertical: "top",
+    display: "flex",
+    justifyContent: "flex-start",
+    alignContent: "flex-start",
   },
   buttons: {
     display: "flex",

@@ -7,6 +7,7 @@ import ViewCollection from "./screens/ViewCollection";
 import ViewItem from "./screens/ViewItem";
 import CreateAccount from "./screens/CreateAccount";
 import AddCollection from "./components/AddCollection";
+import Camera from "./screens/Camera";
 
 const Stack = createNativeStackNavigator();
 export default function App() {
@@ -28,6 +29,7 @@ export default function App() {
         <Stack.Screen name="ViewItem" component={ViewItem} />
         {/* <Stack.Screen name="AddCollection" component={AddCollection} /> */}
         <Stack.Screen name="Dashboard" component={Dashboard} />
+        <Stack.Screen name="Camera" component={Camera} />
       </Stack.Navigator>
     </NavigationContainer>
   );

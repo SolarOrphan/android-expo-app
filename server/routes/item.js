@@ -6,9 +6,9 @@ const client = new Client({
     secureConnectBundle: "secure-connect-currencykeepers.zip",
   },
   credentials: {
-    username: "caCRCuZJNjOfUWkQirbjTBnx",
+    username: "MXXZdvDuqQPdQwTAJNrPxoTZ",
     password:
-      "N1w+B4ohe+eHjkGn2Mhcj1gzDq-N5,No6eBfca1U0c.oBogkBvin0NCPLy23PZpY7OqqhE6F72KebZhB_d3qH5rnv5IW1B.LXn3HM7xK1T.UOrJWjPNxS.CxHZEL0.cK",
+      "fnjNsrGATj-tiAJlUgvK.4g_5J1SX6ZCiWfwgDfj2tbhZdF7WKh+MSDjzv0t6q74TE_fAD.G0v1f1Au6zj.E3b_77JZr+A_PnCOp959tOKLdy+EWr+8CFLiyt4e3gRcH",
   },
 });
 //Creating collection
@@ -50,12 +50,15 @@ router.post("/", async (req, res) => {
       .then((data) => {
         res.status(200).json({
           message: "Success",
-          data: { collection_ids: user_obj.rows[0].item_ids },
+          data: {
+            collection_ids: user_obj.rows[0].item_ids,
+            message: "Success",
+          },
         });
       });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "Fail" });
   }
   // await client.shutdown();
 });
@@ -107,14 +110,25 @@ router.post("/get_one", async (req, res) => {
 });
 
 //Updating collection object
-router.patch("/", (req, res) => {});
+router.post("/update", async (req, res) => {
+  var user_obj = req.body.item;
+  await client
+    .execute(
+      `UPDATE currency_keepers.collections SET name='${user_obj.name}' , description='${user_obj.description}' , image='${user_obj.image}' , creator='${user_obj.creator}' WHERE id = ${user_obj.id};`
+    )
+    .then((data) => {
+      res.status(200).json({
+        message: "Success",
+      });
+    });
+});
 
 router.delete("/delete", async (req, res) => {
   try {
     var { id } = req.body;
     await client.connect();
     await client
-      .execute(`DELETE  FROM currency_keepers.items WHERE id = ${id};`)
+      .execute(`DELETE FROM currency_keepers.items WHERE id = ${id};`)
       .then((data) => {
         res.status(200).json({ message: "Success" });
       });

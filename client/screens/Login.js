@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
+  Alert,
 } from "react-native";
 import { React, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -16,10 +17,31 @@ export default function Login({ navigation }) {
   const [username, username_chg] = useState("");
   const [password, password_chg] = useState("");
   const [load, load_chg] = useState(false);
-
+  const twoOptionAlertHandler = () => {
+    //function to make two option alert
+    Alert.alert(
+      //title
+      "Hello",
+      //body
+      "I am two option alert. Do you want to cancel me ?",
+      [
+        {
+          text: "Yes",
+          onPress: () => console.log("Yes Pressed"),
+        },
+        {
+          text: "No",
+          onPress: () => console.log("No Pressed"),
+          style: "cancel",
+        },
+      ],
+      { cancelable: false }
+      //clicking out side of alert will not cancel
+    );
+  };
   const login_submit = async (username, password) => {
-    load_chg(true)
-    await fetch("http://192.168.0.158:3000/user/login", {
+    load_chg(true);
+    await fetch("http://192.168.8.142:3000/user/login", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -38,11 +60,15 @@ export default function Login({ navigation }) {
             username_chg("");
             password_chg("");
             navigation.navigate("Dashboard");
-            load_chg(false)
+            load_chg(false);
           } catch (e) {
             // saving error
           }
-        } else if (res.message == "Fail") console.log("Fail");
+        } else if (res.message == "Fail") {
+          load_chg(false);
+          console.log("Fail");
+        }
+        twoOptionAlertHandler();
       })
       .catch((error) => {
         console.error(error);
@@ -68,7 +94,7 @@ export default function Login({ navigation }) {
   }, []);
   return (
     <View style={styles.container}>
-      {load ? <Loading /> : null}
+      {load == true ? <Loading /> : null}
       <View style={styles.top_section}>
         <Image source={logo} style={styles.logo} />
       </View>

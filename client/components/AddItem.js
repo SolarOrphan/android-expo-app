@@ -7,36 +7,23 @@ import {
   Modal,
 } from "react-native";
 import { React, useState } from "react";
+import Loading from "../components/Loading";
 
 export default function AddItem({
   show,
   changeshowmodal,
   items_chg,
   collection,
-  navigation
+  navigation,
 }) {
-  console.log(collection)
   const [name, name_chg] = useState("");
   const [desc, desc_chg] = useState("");
-  const load_items = async (ids) => {
-    console.log(ids);
-    await fetch("http://192.168.0.158:3000/item/get_items", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ids: ids,
-      }),
-    }).then(async (res) => {
-      let res_fm = res.json();
-      items_chg(res_fm.data.item_ids)
-    });
-  };
+  const [load, load_chg] = useState(false);
+
   const add_item_submit = async (name, desc, collection) => {
-    console.log(collection)
-    await fetch("http://192.168.0.158:3000/item/", {
+    load_chg(true);
+
+    await fetch("http://192.168.8.142:3000/item/", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -50,22 +37,23 @@ export default function AddItem({
     })
       .then(async (response) => {
         let res = await response.json();
-        console.log(res.message);
         if (res.message == "Success") {
           name_chg("");
           desc_chg("");
+          navigation.navigate("ViewCollection", { collection });
         } else if (res.message == "Fail") console.log("Fail");
       })
       .catch((error) => {
         console.error(error);
       });
-      
-      changeshowmodal(false);
-      navigation.navigate("ViewCollection")
-      
+
+    changeshowmodal(false);
+    load_chg(false);
   };
   return (
     <Modal visible={show} style={styles.modalcontainer} animationType="slide">
+      {load == true ? <Loading /> : null}
+
       <View style={styles.modalform}>
         <Text style={styles.header}>Add Item</Text>
         <TextInput
@@ -89,7 +77,7 @@ export default function AddItem({
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.Sign_in_btn}
-            onPress={() => add_item_submit(name, desc, collection)}
+            onPress={() => add_item_submit(name, desc, collection, navigation)}
           >
             <Text style={styles.btn_label}>Add</Text>
           </TouchableOpacity>

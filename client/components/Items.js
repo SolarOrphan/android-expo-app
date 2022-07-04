@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 export default function Item({ item, navigation, load_collections}) {
-  var { name, description, _id } = item;
+  var { name, description, id } = item;
   return (
     <View>
       <TouchableOpacity
-        onPress={() => navigation.navigate("ViewItem", { _id,load_collections})}
+        onPress={() => navigation.navigate("ViewItem", { id,load_collections})}
         style={styles.item}
       >
         <View style={styles.image}></View>

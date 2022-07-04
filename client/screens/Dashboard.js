@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
+  RefreshControl,
 } from "react-native";
 import { React, useState, useEffect } from "react";
 import CollectionItem from "../components/Collections.js";
@@ -26,7 +27,9 @@ export default function Dashboard({ navigation }) {
   const [collections, collections_chg] = useState([]);
   let mounted = true;
   const load_collections = async (ids_retreived) => {
-    await fetch("http://192.168.0.158:3000/collection/get_collections", {
+    load_chg(true);
+
+    await fetch("http://192.168.8.142:3000/collection/get_collections", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -40,11 +43,12 @@ export default function Dashboard({ navigation }) {
       if (mounted) {
         succreq_chg(true);
         collections_chg(res_fm.data);
+        load_chg(false);
       }
     });
   };
   const get_user = async (id_user) =>
-    await fetch("http://192.168.0.158:3000/user/get_user", {
+    await fetch("http://192.168.8.142:3000/user/get_user", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -61,7 +65,12 @@ export default function Dashboard({ navigation }) {
             ids: response.data.user.collection_ids,
             user_obj: response.data.user,
           };
-        } else navigation.navigate("Login");
+        } else {
+          navigation.navigate("Login");
+          return {
+            ids: null,
+          };
+        }
       })
       .catch((e) => console.log(e));
   const storage_userid = async () => {
@@ -72,6 +81,25 @@ export default function Dashboard({ navigation }) {
       return null;
     }
   };
+  const refresh_dash = () =>
+    storage_userid().then(async (user_id) => {
+      load_chg(true);
+
+      await get_user(user_id)
+        .then(({ ids, user_obj }) => {
+          change_user_obj(user_obj);
+          if (ids != null) {
+            load_collections(ids);
+
+            console.log(collections);
+          }
+          return () => (mounted = false);
+        })
+        .catch((e) => {
+          console.log(e);
+          navigation.navigate("Login");
+        });
+    });
   useEffect(() => {
     storage_userid().then(async (user_id) => {
       if (user_id != null) {
@@ -82,7 +110,6 @@ export default function Dashboard({ navigation }) {
             change_user_obj(user_obj);
             if (ids != null) {
               load_collections(ids);
-              load_chg(false);
 
               console.log(collections);
             }
@@ -91,13 +118,17 @@ export default function Dashboard({ navigation }) {
           .catch((e) => {
             console.log(e);
             navigation.navigate("Login");
+            AsyncStorage.removeItem("@user_id");
           });
-      } else navigation.navigate("Login");
+      } else {
+        navigation.navigate("Login");
+        AsyncStorage.removeItem("@user_id");
+      }
     });
   }, []);
   return (
     <View style={styles.container}>
-         {load && succreq ? <Loading /> : null}
+      {load == true && succreq == false ? <Loading /> : null}
       <Text style={styles.header}>
         Welcome back {user_obj ? user_obj.username : null}
       </Text>
@@ -138,7 +169,14 @@ export default function Dashboard({ navigation }) {
         showmodal={showmodal}
         changeshowmodal={changeshowmodal}
         load_collections={load_collections}
+        navigation={navigation}
       />
+      <TouchableOpacity
+        style={styles.Sign_in_btn}
+        onPress={() => refresh_dash()}
+      >
+        <Text style={styles.btn_label}>Refresh</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -217,4 +255,26 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
   },
   modalform: {},
+  btncontainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: 300,
+  },
+  Sign_in_btn: {
+    backgroundColor: "#a5a5a5",
+    height: 50,
+    margin: 3,
+    // marginLeft: "auto",
+    // marginRight: "auto",
+    borderRadius: 15,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  btn_label: {
+    fontWeight: "bold",
+    fontSize: 15,
+    color: "#fff",
+  },
 });
