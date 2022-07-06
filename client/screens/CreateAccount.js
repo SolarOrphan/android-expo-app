@@ -17,7 +17,7 @@ export default function CreateAccount({ navigation }) {
   const [confirm, confirm_chg] = useState("");
   const create_submit = async (username, password, confirm) => {
     if (username > "" && password > "" && confirm > "" && confirm == password)
-      await fetch("http://192.168.8.142:3000/user", {
+      await fetch("http://192.168.0.158:3000/user", {
         method: "POST",
         headers: {
           Accept: "application/json",

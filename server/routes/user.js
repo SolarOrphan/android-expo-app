@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
       )
       .then(async (data) => {
         if (data.rowLength > 0) {
-          res.status(202).json({ message: "Exists" });
+          res.status(200).json({ message: "Exists" });
         } else
           await client
             .execute(
@@ -55,18 +55,20 @@ router.post("/login", async (req, res) => {
     var { username, password } = req.body;
     await client.connect();
     await client
-      .execute(
-        `SELECT * FROM currency_keepers.users WHERE username = '${username}' AND password = '${password}' ALLOW FILTERING;`
+    .execute(
+      `SELECT * FROM currency_keepers.users WHERE username = '${username}' AND password = '${password}' ALLOW FILTERING;`
       )
-      .then((data) => {
-        if (data.rowLength > 0)
+      .then(async (data) => {
+        if (data.rowLength > 0) {
+          console.log(data.rowLength);
+
           res
             .status(200)
             .json({ message: "Success", data: { id: data.rows[0].id } });
-        else res.status(202).json({ message: "Fail" });
+        } else res.status(200).json({ message: "Fail" });
       });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "Fail" });
   }
   // await client.shutdown();
 });

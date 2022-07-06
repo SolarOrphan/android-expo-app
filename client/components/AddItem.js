@@ -23,7 +23,7 @@ export default function AddItem({
   const add_item_submit = async (name, desc, collection) => {
     load_chg(true);
 
-    await fetch("http://192.168.8.142:3000/item/", {
+    await fetch("http://192.168.0.158:3000/item/", {
       method: "POST",
       headers: {
         Accept: "application/json",

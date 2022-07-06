@@ -17,23 +17,19 @@ export default function Login({ navigation }) {
   const [username, username_chg] = useState("");
   const [password, password_chg] = useState("");
   const [load, load_chg] = useState(false);
-  const twoOptionAlertHandler = () => {
+  const twoOptionAlertHandler = (mess) => {
     //function to make two option alert
     Alert.alert(
       //title
-      "Hello",
+      "Please try again",
       //body
-      "I am two option alert. Do you want to cancel me ?",
+      mess,
       [
         {
-          text: "Yes",
+          text: "OK",
           onPress: () => console.log("Yes Pressed"),
         },
-        {
-          text: "No",
-          onPress: () => console.log("No Pressed"),
-          style: "cancel",
-        },
+
       ],
       { cancelable: false }
       //clicking out side of alert will not cancel
@@ -41,7 +37,7 @@ export default function Login({ navigation }) {
   };
   const login_submit = async (username, password) => {
     load_chg(true);
-    await fetch("http://192.168.8.142:3000/user/login", {
+    await fetch("http://192.168.0.158:3000/user/login", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -67,10 +63,11 @@ export default function Login({ navigation }) {
         } else if (res.message == "Fail") {
           load_chg(false);
           console.log("Fail");
+          twoOptionAlertHandler("You've entered incorrect credetnials!");
         }
-        twoOptionAlertHandler();
       })
       .catch((error) => {
+        twoOptionAlertHandler("Something went wrong");
         console.error(error);
       });
   };

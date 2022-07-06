@@ -23,7 +23,7 @@ export default function ViewItem({ route, navigation }) {
     navigation.navigate("Camera");
   };
   const delete_item = async (id) => {
-    await fetch("http://192.168.8.142:3000/item/delete_item", {
+    await fetch("http://192.168.0.158:3000/item/delete_item", {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -35,7 +35,7 @@ export default function ViewItem({ route, navigation }) {
     });
   };
   const update = async (item) => {
-    await fetch("http://192.168.8.142:3000/item/update", {
+    await fetch("http://192.168.0.158:3000/item/update", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -53,7 +53,7 @@ export default function ViewItem({ route, navigation }) {
   const load_items_info = async (id) => {
     load_chg(true);
 
-    await fetch("http://192.168.8.142:3000/item/get_one", {
+    await fetch("http://192.168.0.158:3000/item/get_one", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -75,7 +75,6 @@ export default function ViewItem({ route, navigation }) {
       });
   };
   useEffect(() => {
-    console.log("HERE");
     load_items_info(id);
     return () => (mounted = false);
   }, []);

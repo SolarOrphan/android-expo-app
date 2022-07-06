@@ -20,7 +20,23 @@ export default function Dashboard({ navigation }) {
   const [succreq, succreq_chg] = useState(false);
   const [user_obj, user_obj_chg] = useState(null);
   const [load, load_chg] = useState(false);
-
+  const twoOptionAlertHandler = (mess) => {
+    //function to make two option alert
+    Alert.alert(
+      //title
+      "Please try again",
+      //body
+      mess,
+      [
+        {
+          text: "OK",
+          onPress: () => console.log("Yes Pressed"),
+        },
+      ],
+      { cancelable: false }
+      //clicking out side of alert will not cancel
+    );
+  };
   const change_user_obj = (userobj) => {
     user_obj_chg(userobj);
   };
@@ -29,7 +45,7 @@ export default function Dashboard({ navigation }) {
   const load_collections = async (ids_retreived) => {
     load_chg(true);
 
-    await fetch("http://192.168.8.142:3000/collection/get_collections", {
+    await fetch("http://192.168.0.158:3000/collection/get_collections", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -41,14 +57,14 @@ export default function Dashboard({ navigation }) {
     }).then(async (res) => {
       let res_fm = await res.json();
       if (mounted) {
-        succreq_chg(true);
         collections_chg(res_fm.data);
+        succreq_chg(true);
         load_chg(false);
       }
     });
   };
   const get_user = async (id_user) =>
-    await fetch("http://192.168.8.142:3000/user/get_user", {
+    await fetch("http://192.168.0.158:3000/user/get_user", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -87,8 +103,8 @@ export default function Dashboard({ navigation }) {
 
       await get_user(user_id)
         .then(({ ids, user_obj }) => {
-          change_user_obj(user_obj);
           if (ids != null) {
+            change_user_obj(user_obj);
             load_collections(ids);
 
             console.log(collections);
@@ -107,11 +123,14 @@ export default function Dashboard({ navigation }) {
 
         await get_user(user_id)
           .then(({ ids, user_obj }) => {
-            change_user_obj(user_obj);
             if (ids != null) {
+              change_user_obj(user_obj);
               load_collections(ids);
 
               console.log(collections);
+            } else {
+              succreq_chg(true);
+              load_chg(false);
             }
             return () => (mounted = false);
           })
@@ -176,6 +195,15 @@ export default function Dashboard({ navigation }) {
         onPress={() => refresh_dash()}
       >
         <Text style={styles.btn_label}>Refresh</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.Sign_in_btn}
+        onPress={() => {
+          AsyncStorage.removeItem("@user_id");
+          navigation.navigate("Login");
+        }}
+      >
+        <Text style={styles.btn_label_signout}>Sign out</Text>
       </TouchableOpacity>
     </View>
   );
@@ -276,5 +304,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 15,
     color: "#fff",
+  },
+  btn_label_signout: {
+    color: "red",
+    fontWeight: "bold",
+    fontSize: 15,
   },
 });

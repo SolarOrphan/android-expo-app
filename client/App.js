@@ -15,9 +15,9 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator>
         {/* <Stack.Screen
-          name="Dashboard"
-          component={Dashboard}
-          options={{ title: 'Dashboard' }}
+          name="Camera"
+          component={Camera}
+          options={{ title: 'Camera' }}
         /> */}
         <Stack.Screen
           name="Login"

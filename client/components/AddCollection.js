@@ -31,7 +31,7 @@ export default function AddCollection({
   const add_coll_submit = async (name, desc, navigation) => {
     load_chg(true);
     storage_userid().then(async (user_id) => {
-      await fetch("http://192.168.8.142:3000/collection/", {
+      await fetch("http://192.168.0.158:3000/collection/", {
         method: "POST",
         headers: {
           Accept: "application/json",

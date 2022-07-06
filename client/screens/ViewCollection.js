@@ -22,7 +22,7 @@ export default function ViewCollection({ route, navigation }) {
   const [load, load_chg] = useState(false);
 
   const delcolltext = async (id) => {
-    await fetch("http://192.168.8.142:3000/collection/delete", {
+    await fetch("http://192.168.0.158:3000/collection/delete", {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -45,7 +45,7 @@ export default function ViewCollection({ route, navigation }) {
   const load_items = async (item_ids) => {
     if (item_ids != null) {
       load_chg(true);
-      await fetch("http://192.168.8.142:3000/item/get_items", {
+      await fetch("http://192.168.0.158:3000/item/get_items", {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -65,7 +65,7 @@ export default function ViewCollection({ route, navigation }) {
   };
   const load_collection_info = async (id) => {
     load_chg(true);
-    await fetch("http://192.168.8.142:3000/collection/get_one", {
+    await fetch("http://192.168.0.158:3000/collection/get_one", {
       method: "POST",
       headers: {
         Accept: "application/json",
